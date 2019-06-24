@@ -1,2 +1,2 @@
 # logit_model
-logit model for route choice model
+This logit model implementation in R for route choice (shortcut/familiar route) model. Also, there will be some competing model implementation for route choice
