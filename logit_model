@@ -1,0 +1,25 @@
+# basic logit model
+mylogit <- glm(betacode ~., data = total, family = "binomial")
+summary(mylogit)
+exp(coef(mylogit))
+## odds ratios and 95% CI
+exp(cbind(OR = coef(mylogit), confint(mylogit)))
+
+# classification 
+# Create Training Data
+input_ones <- subset(total, betacode == "1")  # all 1's
+input_zeros <- subset(total, betacode == "0")   # all 0's
+set.seed(50)  # for repeatability of samples
+input_ones_training_rows <- sample(1:nrow(input_ones), 0.5*nrow(input_ones))  # 1's for training
+input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.5*nrow(input_ones))  # 0's for training. Pick as many 0's as 1's
+training_ones <- input_ones[input_ones_training_rows, ]  
+training_zeros <- input_zeros[input_zeros_training_rows, ]
+trainingData <- rbind(training_ones, training_zeros)  # row bind the 1's and 0's 
+
+# Create Test Data
+test_ones <- input_ones[-input_ones_training_rows, ]
+test_zeros <- input_zeros[-input_zeros_training_rows, ]
+testData <- rbind(test_ones, test_zeros)  # row bind the 1's and 0's 
+
+logitMod <- glm(betacode ~., data=trainingData, family=binomial(link="logit"))
+summary(logitMod)
