@@ -2,11 +2,11 @@
 library(readxl)
 data <- read_excel("route_new.xlsx")
 # delete missing data column
-newdata$cts2 <- NULL
-newdata$cts3 <- NULL
-newdata$cts4 <- NULL
-# Check missing data
-newdata <- na.omit(mydata)
+data$cts2 <- NULL
+data$cts3 <- NULL
+data$cts4 <- NULL
+# Or Check missing data
+data <- na.omit(data)
 
 
 library(plyr)
