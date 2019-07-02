@@ -1,6 +1,13 @@
 # input dataset
 library(readxl)
 data <- read_excel("route_new.xlsx")
+# delete missing data column
+newdata$cts2 <- NULL
+newdata$cts3 <- NULL
+newdata$cts4 <- NULL
+# Check missing data
+newdata <- na.omit(mydata)
+
 
 library(plyr)
 data$betacode <- revalue(data$betacode, c("shortcut"="1"))
