@@ -18,8 +18,8 @@ data2 <- subset(data, betacode == "0")
 head(data1)
 total <- rbind(data1, data2)
 total$betacode <- as.numeric(as.character(total$betacode))
-summary(total$betacode)
-sapply(total, sd)
+# To check how many data left for binary dependent variables
+dim(total)
 table(total$betacode)
 
 # correlation
