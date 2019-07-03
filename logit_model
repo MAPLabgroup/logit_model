@@ -6,10 +6,36 @@ exp(coef(mylogit))
 exp(cbind(OR = coef(mylogit), confint(mylogit)))
 
 # classification 
+# An approach to create the same proportion training/ test data
+# Install and load caTools package 
+install.packages("caTools")
+library(caTools)
+# Randomly split data
+set.seed(66)
+split = sample.split(total$betacode, SplitRatio = 0.75)
+table(split)
+trainingData = subset(total, split == TRUE)
+testData = subset(total, split == FALSE)
+
+# An alternative approach to creat balanced data
+library(caret)
+'%ni%' <- Negate('%in%')  # define 'not in' func
+options(scipen=999)  # prevents printing scientific notations.
+
+# Prep Training and Test data.
+set.seed(100)
+trainDataIndex <- createDataPartition(total$betacode, p=0.7, list = F)  # 70% training data
+trainData <- total[trainDataIndex, ]
+testData <- total[-trainDataIndex, ]
+table(trainData$betacode)
+table(testData$betacode)
+
+# An approach that only works for balaced original dataset
 # Create Training Data
 input_ones <- subset(total, betacode == "1")  # all 1's
 input_zeros <- subset(total, betacode == "0")   # all 0's
 set.seed(50)  # for repeatability of samples
+# createpartition or createfolds 
 input_ones_training_rows <- sample(1:nrow(input_ones), 0.5*nrow(input_ones))  # 1's for training
 input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.5*nrow(input_ones))  # 0's for training. Pick as many 0's as 1's
 training_ones <- input_ones[input_ones_training_rows, ]  
@@ -21,5 +47,33 @@ test_ones <- input_ones[-input_ones_training_rows, ]
 test_zeros <- input_zeros[-input_zeros_training_rows, ]
 testData <- rbind(test_ones, test_zeros)  # row bind the 1's and 0's 
 
+# General Model
 logitMod <- glm(betacode ~., data=trainingData, family=binomial(link="logit"))
 summary(logitMod)
+
+# Model evaluation
+library(tidyverse)
+library(caret)
+library(MASS)
+library(InformationValue)
+
+probabilities <- logitMod %>% predict(testData, type = "response")
+predicted.classes <- ifelse(probabilities > 0.5, "1", "0")
+# Model accuracy
+compare <- confusionMatrix(testData$betacode, predicted.classes)
+mean(predicted.classes==testData$betacode)
+misClassError(testData$betacode, predicted.classes)
+sensitivity(testData$betacode, predicted.classes)
+specificity(testData$betacode, predicted.classes)
+
+# With optimal cutoff value
+optCutOff <- optimalCutoff(testData$betacode, predicted)
+compare <- confusionMatrix(testData$betacode, predicted, threshold = optCutOff)
+# The columns are actuals, while rows are predicteds.
+compare
+misClassError(testData$betacode, predicted, threshold = optCutOff)
+#Sensitivity (or True Positive Rate) is the percentage of (actuals) correctly predicted by the model
+sensitivity(testData$betacode, predicted, threshold = optCutOff)
+# specificity is the percentage of (actuals) correctly predicted
+(specificity(testData$betacode, predicted, threshold = optCutOff)
+
